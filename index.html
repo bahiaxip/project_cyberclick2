@@ -60,7 +60,7 @@ button{
 	font-size: 16px;
 }
 .content li{list-style: none}
-
+.content h3{text-align: center}
 #box{
 	display:flex;
 	width:100%;
@@ -82,7 +82,7 @@ button{
 	<section>
 		<h3>Problema 2: Cantidad de contraseñas válidas </h3>
 		<div style="display:inline-flex">
-
+			
 			<button id="boton1" onclick="init.initAjax('forXHR')" title="loop For-XMLHttpRequest">Ajax1</button>
 			<button id="boton2" onclick="init.initAjax('mapXHR')" title="map-filter-XMLHttpRequest">Ajax1</button>
 		
@@ -91,6 +91,7 @@ button{
 		</div>
 	</section>
 	<div class="content">
+		<h3 id="title_method"></h3>
 		<div>
 			<ul id="box"></ul>			
 		</div>
@@ -107,22 +108,26 @@ button{
 				console.time("loop");
 				//loop for (XMLHttpRequest)
 				if(param=='forXHR'){
+					document.querySelector("#title_method").innerHTML="Datos obtenidos mediante loop for y lectura del archivo realizada con XMLHttpRequest"
 					this.readFile(this.fileTxt).then((res)=>{
 						let result=this.getValidPass(res);
 						this.showData(result);
 					})
 				//map-filter (XMLHttpRequest)
 				}else if(param=='mapXHR'){
+					document.querySelector("#title_method").innerHTML="Datos obtenidos mediante métodos map y filter y lectura del archivo realizada con XMLHttpRequest"
 					this.readFile(this.fileTxt).then((res)=>{
 						let result=this.getValidPass2(res);
 						this.showData(result);						
 					})	
 				}else if(param=='forFetch'){
+					document.querySelector("#title_method").innerHTML="Datos obtenidos mediante loop for y lectura del archivo realizada con Fetch"
 					this.readFileWithFetch(this.fileTxt).then((res)=>{
 						let result=this.getValidPass(res);
 						this.showData(result);					
 					})
 				}else if(param=='mapFetch'){
+					document.querySelector("#title_method").innerHTML="Datos obtenidos mediante métodos map y filter y lectura del archivo realizada con Fetch"
 					this.readFileWithFetch(this.fileTxt).then((res)=>{
 						let result=this.getValidPass2(res);
 						this.showData(result);
