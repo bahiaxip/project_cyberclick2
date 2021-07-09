@@ -79,14 +79,9 @@ button{
 		<h2>Prueba - CyberClick</h2>
 	</nav>
 	<section>
-		<h3>Problema 2: Cantidad de contraseñas válidas </h3>
-			<!--<ul id="myUl">
-			 <li>Múltiplos del 3 por <span class="blue">&nbsp;cyber</span></li>
-			 <li>Múltiplos del 5 por <span class="green">&nbsp;cick</san></li>
-			 <li>Múltiplos del 3 y del 5 por<span class="red">&nbsp;cyberclick</span></li>
-			</ul>-->
+		<h3>Problema 2: Cantidad de contraseñas válidas </h3>			
 		<button id="boton1" onclick="init.initAjax1()">Ajax1</button>
-		<button id="boton2" >Ajax2</button>
+		<button id="boton2" onclick="init.initAjax2()">Ajax2</button>
 	</section>
 	<div class="content">
 		<div>
@@ -111,6 +106,16 @@ button{
 				console.timeEnd("loop");
 			}
 
+			initAjax2(){
+				console.time("loop");
+				this.readFile(this.fileTxt).then((res)=>{
+					let result=this.getValidPass2(res);
+					this.showData(result);
+					console.log("res",result);
+				})
+				console.timeEnd("loop");
+			}
+
 			readFile(file){
 				return new Promise(function(res,rej){
 				var req=new XMLHttpRequest();
@@ -123,7 +128,7 @@ button{
 							rej(Error(req.statusText))
 						}
 					}//else
-						//rej("Error Network")
+						//show loading...
 				}
 				req.send(null);	
 				})
@@ -132,59 +137,87 @@ button{
 			//getting number of valid passwords with loop for
 			getValidPass(data){
 				
-			let dato=data.split(/\r\n/);
-			dato.pop();
-			//let dato=["1-3 a: abcde", "1-3 b: cdefg", "2-9 c: ccccccccc"]
-			//console.log(dato);
-			let counter=0;
-			let counter2=0;
-			//let matchChar
-			for(let i=0;i<dato.length;i++){
-				
-				var myReg=/\d+/g;
-				var myReg2=/[a-z]+/g;
-				//min, max
-				let listNum = dato[i].match(/\d+/g);
-				//char, string
-				let listChars = dato[i].match(/[a-z]+/g);
-				//pattern
-				let miregExp=new RegExp(`${listChars[0]}{1}`,'g');
-               	let matchChar=listChars[1].match(new RegExp(listChars[0]+'{1}','g'));
+				let dato=data.split(/\r\n/);
+				dato.pop();
+			
+				let counter=0;
+				let counter2=0;
+				//let matchChar
+				for(let i=0;i<dato.length;i++){
+					
+					var myReg=/\d+/g;
+					var myReg2=/[a-z]+/g;
+					//min, max
+					let listNum = dato[i].match(/\d+/g);
+					//char, string
+					let listChars = dato[i].match(/[a-z]+/g);
+					//pattern
+					let miregExp=new RegExp(`${listChars[0]}{1}`,'g');
+	               	let matchChar=listChars[1].match(new RegExp(listChars[0]+'{1}','g'));
 
-                if(matchChar)
-                	//primera parte con las contraseñas coincidentes válidas indicadas mediante la variable counter
-                	if(matchChar.length >= listNum[0] && matchChar.length<=listNum[1]){
-		           		counter++;		           		
-		           		//segunda parte: la contraseña debe coincidir con la posición pero solo con uno de los 2 números (los mismos de mínimo y máximo)
-		           		let primero = listChars[1].charAt(listNum[0]-1);
-		           		let segundo = listChars[1].charAt(listNum[1]-1);
-		           		if(primero == listChars[0] || segundo == listChars[0]){
-		           			if(primero==listChars[0] && segundo ==listChars[0])
-		           				console.log("no se contabiliza")
-		           			else{
+	                if(matchChar)
+	                	//primera parte con las contraseñas coincidentes válidas indicadas mediante la variable counter
+	                	if(matchChar.length >= listNum[0] && matchChar.length<=listNum[1]){
+			           		counter++;		           		
+			           		//segunda parte: la contraseña debe coincidir con la posición pero solo con uno de los 2 números (los mismos de mínimo y máximo)
+			           		let primero = listChars[1].charAt(listNum[0]-1);
+			           		let segundo = listChars[1].charAt(listNum[1]-1);
+			           		if(primero === listChars[0] && segundo !== listChars[0]
+			           			|| primero !== listChars[0] && segundo === listChars[0])
+			           			
 		           				counter2++;
-			           			/*
-			           			console.log("posicion del caracter en la cadena: ",listChars[1].charAt(listNum[0]-1))
-			           			console.log("cadena: ",listChars)
-			           			console.log("numero primero: ",listNum[0])
-			           			console.log("coincide con uno de los dos")
-			           			*/
-		           			}
-		           		}
-                	}
+	                	}
+					
+					
 				}
 				return [counter,counter2];
-				//console.log("primera parte: ",counter," contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)");
-				//console.log("segunda parte: ",counter2," contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)");
+					//console.log("primera parte: ",counter," contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)");
+					//console.log("segunda parte: ",counter2," contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)");
+			}
+			//getting number of valid passwords with map and filter methods
+			getValidPass2(dato){
+				let data=dato.split(/\r\n/)
+				data.pop();
+				//min, max
+				let listnum=data.map((item)=>{
+					return item.match(/\d+/g);
+				})
+				//char, string
+				let listchar=data.map((item,index,arr)=>{
+					return item.match(/[a-z]+/g);
+				})
+				//min filtered, max filtered
+				let listnumMinFilter=[];
+				let listnumMaxFilter=[];
+				let nuevo = listchar.filter((it,index)=>{
 				
+					let mat=it[1].match(new RegExp(`${it[0]}`+'{1}','g'));				
+				
+					if(mat && mat.length>=listnum[index][0] && mat.length<=listnum[index][1]){
+						listnumMinFilter.push(listnum[index][0]);
+						listnumMaxFilter.push(listnum[index][1]);					
+						return it[1].match(new RegExp(`${it[0]}`+'{1}','g'))
+					}
+				})
+				let nuevo2 = nuevo.filter((item,index)=>{
+					//console.log(listnumMinFilter[index])
+					//console.log(listnumMaxFilter[index])
+					//console.log(item);
+					let param1 = item[1][listnumMinFilter[index]-1];
+	           		let param2 = item[1][listnumMaxFilter[index]-1];
+					if(param1 === item[0] && param2 !== item[0]
+						|| param1 !== item[0] && param2 === item[0])
+           				
+           				return item;
+				})			
+				//contraseñas válidas
+				return [nuevo.length,nuevo2.length];
 			}
 
 			showData(result){
-				let phrase=`
-				<li>primera parte: <span style="color:blue">${result[0]}</span> contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)</li>
-				<li>segunda parte: <span style="color:blue">${result[1]}</span> contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)</li>
-
-				`
+				let phrase=
+				`<li>primera parte: <span style="color:blue">${result[0]}</span> contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)</li>
+				<li>segunda parte: <span style="color:blue">${result[1]}</span> contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)</li>`
 
 				document.querySelector("#box").innerHTML=phrase;
 			}
