@@ -67,6 +67,10 @@ button{
 	margin:auto;
 	flex-direction:column;
 	flex-wrap:wrap;
+	text-align: center;
+}
+#box li{
+	margin-top: 10px;
 }
 
 </style>
@@ -81,13 +85,113 @@ button{
 			 <li>Múltiplos del 5 por <span class="green">&nbsp;cick</san></li>
 			 <li>Múltiplos del 3 y del 5 por<span class="red">&nbsp;cyberclick</span></li>
 			</ul>-->
-		<button id="boton1" >Parte1</button>
-		<button id="boton2" >Parte2</button>
+		<button id="boton1" onclick="init.initAjax1()">Ajax1</button>
+		<button id="boton2" >Ajax2</button>
 	</section>
 	<div class="content">
 		<div>
-			<ul id="box"></ul>
+			<ul id="box"></ul>			
 		</div>
 	</div>
+	<script>
+		class ShowValidPass{
+			
+			constructor(){
+				this.fileTxt="./input.txt.txt";
+				//this.initAjax1();
+			}
+			//var fileTxt="./input.txt.txt";
+			initAjax1(){
+				console.time("loop");
+				this.readFile(this.fileTxt).then((res)=>{
+					let result=this.getValidPass(res);
+					this.showData(result);
+					console.log("res",result);
+				})
+				console.timeEnd("loop");
+			}
+
+			readFile(file){
+				return new Promise(function(res,rej){
+				var req=new XMLHttpRequest();
+				req.open("GET",file,true);
+				req.onreadystatechange = ()=>{
+					if(req.readyState===4){
+						if(req.status===200){							
+							res(req.responseText);
+						}else{
+							rej(Error(req.statusText))
+						}
+					}//else
+						//rej("Error Network")
+				}
+				req.send(null);	
+				})
+			}
+
+			//getting number of valid passwords with loop for
+			getValidPass(data){
+				
+			let dato=data.split(/\r\n/);
+			dato.pop();
+			//let dato=["1-3 a: abcde", "1-3 b: cdefg", "2-9 c: ccccccccc"]
+			//console.log(dato);
+			let counter=0;
+			let counter2=0;
+			//let matchChar
+			for(let i=0;i<dato.length;i++){
+				
+				var myReg=/\d+/g;
+				var myReg2=/[a-z]+/g;
+				//min, max
+				let listNum = dato[i].match(/\d+/g);
+				//char, string
+				let listChars = dato[i].match(/[a-z]+/g);
+				//pattern
+				let miregExp=new RegExp(`${listChars[0]}{1}`,'g');
+               	let matchChar=listChars[1].match(new RegExp(listChars[0]+'{1}','g'));
+
+                if(matchChar)
+                	//primera parte con las contraseñas coincidentes válidas indicadas mediante la variable counter
+                	if(matchChar.length >= listNum[0] && matchChar.length<=listNum[1]){
+		           		counter++;		           		
+		           		//segunda parte: la contraseña debe coincidir con la posición pero solo con uno de los 2 números (los mismos de mínimo y máximo)
+		           		let primero = listChars[1].charAt(listNum[0]-1);
+		           		let segundo = listChars[1].charAt(listNum[1]-1);
+		           		if(primero == listChars[0] || segundo == listChars[0]){
+		           			if(primero==listChars[0] && segundo ==listChars[0])
+		           				console.log("no se contabiliza")
+		           			else{
+		           				counter2++;
+			           			/*
+			           			console.log("posicion del caracter en la cadena: ",listChars[1].charAt(listNum[0]-1))
+			           			console.log("cadena: ",listChars)
+			           			console.log("numero primero: ",listNum[0])
+			           			console.log("coincide con uno de los dos")
+			           			*/
+		           			}
+		           		}
+                	}
+				}
+				return [counter,counter2];
+				//console.log("primera parte: ",counter," contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)");
+				//console.log("segunda parte: ",counter2," contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)");
+				
+			}
+
+			showData(result){
+				let phrase=`
+				<li>primera parte: <span style="color:blue">${result[0]}</span> contraseñas son válidas (se encuentran entre el mínimo y el máximo establecidos)</li>
+				<li>segunda parte: <span style="color:blue">${result[1]}</span> contraseñas son válidas (se encuentran en la posición del primer número o del segundo número)</li>
+
+				`
+
+				document.querySelector("#box").innerHTML=phrase;
+			}
+		}
+		
+		let init = new ShowValidPass();
+		
+	</script>
 </body>
 </html>
